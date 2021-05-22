@@ -10,7 +10,7 @@ rule ldexe
   command = $ld $ldflags -o $out $libs $in
 
 rule ldso
-  command = $ld -shared $ldflags -o $out $libs $in
+  command = $ld -shared -fPIC $ldflags -o $out $libs $in
 
 build chall_interesting.o: cc chall_interesting.c
 build chall_interesting: ldexe chall_interesting
@@ -20,3 +20,4 @@ build x2: ldexe x2.o
 
 build circumvent.o: cc circumvent.c
 build circumvent.so: ldso circumvent.o
+  libs = -ldl
