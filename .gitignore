@@ -1,2 +1,7 @@
 chall_interesting
 x2
+.ninja_log
+
+.#*
+*.o
+*.so
