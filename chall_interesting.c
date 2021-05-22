@@ -3,16 +3,15 @@
 // Website: https://retdec.com
 //
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 int64_t g1 = 0x12a0; // 0x3dd8
 int64_t g2 = 0x1260; // 0x3de0
 int64_t g3 = 0; // 0x3ff8
-char * g4[2] = {
-    "(eU8Z7HoOn<E6C(`(r&GU'RP`e1", // null byte here
-    "84W[WiI.GbI=['S+oc]piSCN(f"
-}; // 0x40e8
+char * g4 = "(eU8Z7HoOn<E6C(`(r&GU'RP`e1\x00\x384W[WiI.GbI=['S+oc]piSCN(f";
 //struct _IO_FILE * g5 = NULL; // 0x4100
 //char g6 = 0; // 0x4108
 //int128_t g7 = &g8; // 0x410c
@@ -29,7 +28,6 @@ int64_t function_12a5(signed char a1, signed char a2) {
 bool function_18a3(char * str) {
     // 0x1997
     // request input
-    char * str; // bp-548, 0x18a3
     int32_t len = strlen(str);
     if (len > 0) {
         for (int64_t v2 = 0; v2 != (int64_t)len; v2++) {
@@ -50,17 +48,17 @@ bool function_18a3(char * str) {
 }
 
 bool check_pos(int i, char x) {
-  int64_t v1 = 2 * (int64_t)x - 64;
-  char y = (((int64_t)(v1 >> 31) << 32) (int64_t)v1) % 95 + 32;
-  return y == ((char *)g4)[i];
+  char y = (2 * (int64_t)x - 64) % 95 + 32;
+  return y == g4[i];
 }
 
 int main(int argc, char *argv[]) {
   char res[55] = {'~'};
-  for(int i = 0; i < 54; ++i) {
+  res[54] = 0;
+  for(int i = 0; i < 27; ++i) {
     for(int x = 0; x < 256; ++x) {
       if(check_pos(i, (char) x)) {
-        printf("%d: %c", i, x);
+        printf("%d: %d %c\n", i, (int)x, x);
         res[i] = x;
       }
     }
