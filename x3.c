@@ -40,13 +40,15 @@ int64_t function_12a5(int64_t a1, int64_t a2) {
 
 // Address range: 0x18a3 - 0x1bf6
 int64_t function_18a3(char *str, int32_t len) {
+    printf("{");
     for (int64_t v2 = 0; v2 < (int64_t)len; v2++) {
         // 0x1b66
         char * v5 = (char *)(str + v2);
         char v6 = *(char *)(str + v2);
         *v5 = function_12a5((int64_t)v6 & 0xffffffff, (int64_t)*v5 & 0xffffffff);
-        printf("%d -> %d\n", (unsigned int) (unsigned char) v6, (unsigned int) (unsigned char) *v5);
+        printf(" %d,", (unsigned int) (unsigned char) *v5);
     }
+    printf("}\n");
     int32_t strncmp_rc = strncmp(str, g4[0], len); // 0x1bc6
     if (strncmp_rc != 0) {
         // 0x1be5

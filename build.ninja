@@ -21,6 +21,9 @@ build x2: ldexe x2.o
 build x3.o: cc x3.c
 build x3: ldexe x3.o
 
+build x4.o: cc x4.c
+build x4: ldexe x4.o
+
 build circumvent.o: cc circumvent.c
 build circumvent.so: ldso circumvent.o
   libs = -ldl
