@@ -18,6 +18,9 @@ build chall_interesting: ldexe chall_interesting
 build x2.o: cc x2.c
 build x2: ldexe x2.o
 
+build x3.o: cc x3.c
+build x3: ldexe x3.o
+
 build circumvent.o: cc circumvent.c
 build circumvent.so: ldso circumvent.o
   libs = -ldl
