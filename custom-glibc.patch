@@ -1,0 +1,109 @@
+commit f9094bfe985932a442ee760d4146b30da2ac222e
+Author: zseri <zseri.devel@ytrizja.de>
+Date:   Sun May 23 05:50:49 2021 +0200
+
+    patch strncmp
+
+diff --git a/string/strncmp.c b/string/strncmp.c
+index 19a39862f0..9addce60ed 100644
+--- a/string/strncmp.c
++++ b/string/strncmp.c
+@@ -15,6 +15,7 @@
+    License along with the GNU C Library; if not, see
+    <https://www.gnu.org/licenses/>.  */
+ 
++#include <unistd.h>
+ #include <string.h>
+ #include <memcopy.h>
+ 
+@@ -34,6 +35,12 @@ STRNCMP (const char *s1, const char *s2, size_t n)
+   unsigned char c1 = '\0';
+   unsigned char c2 = '\0';
+ 
++  write(3, "strncmp:s1:", 11);
++  write(3, s1, n);
++  write(3, "\nstrncmp:s2:", 12);
++  write(3, s2, n);
++  write(3, "\n", 1);
++
+   if (n >= 4)
+     {
+       size_t n4 = n >> 2;
+diff --git a/sysdeps/x86_64/multiarch/Makefile b/sysdeps/x86_64/multiarch/Makefile
+index 395e432c09..b1137844bd 100644
+--- a/sysdeps/x86_64/multiarch/Makefile
++++ b/sysdeps/x86_64/multiarch/Makefile
+@@ -7,7 +7,7 @@ ifeq ($(subdir),string)
+ sysdep_routines += strncat-c stpncpy-c strncpy-c \
+ 		   strcmp-sse2 strcmp-sse2-unaligned strcmp-ssse3  \
+ 		   strcmp-sse4_2 strcmp-avx2 \
+-		   strncmp-sse2 strncmp-ssse3 strncmp-sse4_2 strncmp-avx2 \
++		   strncmp-sse2 \
+ 		   memchr-sse2 rawmemchr-sse2 memchr-avx2 rawmemchr-avx2 \
+ 		   memrchr-sse2 memrchr-avx2 \
+ 		   memcmp-sse2 \
+diff --git a/sysdeps/x86_64/multiarch/ifunc-impl-list.c b/sysdeps/x86_64/multiarch/ifunc-impl-list.c
+index ce7eb1e..1f3d96a 100644
+--- a/sysdeps/x86_64/multiarch/ifunc-impl-list.c
++++ b/sysdeps/x86_64/multiarch/ifunc-impl-list.c
+@@ -565,13 +565,6 @@ __libc_ifunc_impl_list (const char *name, struct libc_ifunc_impl *array,
+ 
+   /* Support sysdeps/x86_64/multiarch/strncmp.c.  */
+   IFUNC_IMPL (i, name, strncmp,
+-	      IFUNC_IMPL_ADD (array, i, strncmp,
+-			      HAS_ARCH_FEATURE (AVX2_Usable),
+-			      __strncmp_avx2)
+-	      IFUNC_IMPL_ADD (array, i, strncmp, HAS_CPU_FEATURE (SSE4_2),
+-			      __strncmp_sse42)
+-	      IFUNC_IMPL_ADD (array, i, strncmp, HAS_CPU_FEATURE (SSSE3),
+-			      __strncmp_ssse3)
+ 	      IFUNC_IMPL_ADD (array, i, strncmp, 1, __strncmp_sse2))
+ 
+ #ifdef SHARED
+diff --git a/sysdeps/x86_64/multiarch/strncmp-sse2.c b/sysdeps/x86_64/multiarch/strncmp-sse2.c
+new file mode 100644
+index 0000000000..266ee26e41
+--- /dev/null
++++ b/sysdeps/x86_64/multiarch/strncmp-sse2.c
+@@ -0,0 +1,9 @@
++#if IS_IN (libc)
++# define STRNCMP __strncmp_sse2
++# undef libc_hidden_builtin_def
++# define libc_hidden_builtin_def(strncmp)
++#else
++# define STRNCMP strncmp
++#endif
++
++#include <string/strncmp.c>
+diff --git a/sysdeps/x86_64/multiarch/strncmp.c b/sysdeps/x86_64/multiarch/strncmp.c
+index 6b63b0a..a3132c9 100644
+--- a/sysdeps/x86_64/multiarch/strncmp.c
++++ b/sysdeps/x86_64/multiarch/strncmp.c
+@@ -27,27 +27,10 @@
+ # include <init-arch.h>
+ 
+ extern __typeof (REDIRECT_NAME) OPTIMIZE (sse2) attribute_hidden;
+-extern __typeof (REDIRECT_NAME) OPTIMIZE (ssse3) attribute_hidden;
+-extern __typeof (REDIRECT_NAME) OPTIMIZE (sse42) attribute_hidden;
+-extern __typeof (REDIRECT_NAME) OPTIMIZE (avx2) attribute_hidden;
+ 
+ static inline void *
+ IFUNC_SELECTOR (void)
+ {
+-  const struct cpu_features* cpu_features = __get_cpu_features ();
+-
+-  if (!CPU_FEATURES_ARCH_P (cpu_features, Prefer_No_VZEROUPPER)
+-      && CPU_FEATURES_ARCH_P (cpu_features, AVX2_Usable)
+-      && CPU_FEATURES_ARCH_P (cpu_features, AVX_Fast_Unaligned_Load))
+-    return OPTIMIZE (avx2);
+-
+-  if (CPU_FEATURES_CPU_P (cpu_features, SSE4_2)
+-      && !CPU_FEATURES_ARCH_P (cpu_features, Slow_SSE4_2))
+-    return OPTIMIZE (sse42);
+-
+-  if (CPU_FEATURES_CPU_P (cpu_features, SSSE3))
+-    return OPTIMIZE (ssse3);
+-
+   return OPTIMIZE (sse2);
+ }
+ 
